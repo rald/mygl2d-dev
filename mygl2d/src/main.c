@@ -82,7 +82,7 @@ void draw() {
 		glColor4ub(255,255,255,255);
 		fillCircle(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,32);
 		if(!hold) {
-			ma_engine_play_sound(&engine, "beep.mp3", NULL);
+			ma_engine_play_sound(&engine, "sfx/beep.mp3", NULL);
 			hold=true;
 		}
 	} else {
@@ -96,7 +96,16 @@ void draw() {
 	if(mouse->x>SCREEN_WIDTH-16) { mouse->x=SCREEN_WIDTH-16; glfwSetMousePos(mouse->x,mouse->y); }
 	if(mouse->y>SCREEN_HEIGHT-16) { mouse->y=SCREEN_HEIGHT-16; glfwSetMousePos(mouse->x,mouse->y); }
 
-	drawTargaWithClip(spin,64,16,frames[spinAnim.currentFrame],mouse->x,mouse->y);
+	drawTargaWithClip(spin,64,16,frames[spinAnim.currentFrame],0,0);
+
+	drawTarga(cursor,mouse->x,mouse->y);
+
+
+/*
+	glColor4ub(255,255,255,255);
+	drawRect(1,1,SCREEN_WIDTH-1,SCREEN_HEIGHT-1);
+*/
+
 
 	glFlush();
 	glfwSwapBuffers();
@@ -106,7 +115,7 @@ int main(int argc, char** argv) {
 	glfwInit();
 
 	glfwOpenWindowHint(GLFW_WINDOW_NO_RESIZE,GL_TRUE);
-	glfwOpenWindow(SCREEN_WIDTH,SCREEN_HEIGHT,0, 0, 0, 0, 0, 0,GLFW_WINDOW);
+	glfwOpenWindow(SCREEN_WIDTH,SCREEN_HEIGHT,0, 0, 0, 0, 0, 0,GLFW_FULLSCREEN);
 	glfwSetWindowTitle(GAME_TITLE);
 	glfwDisable(GLFW_MOUSE_CURSOR);
 
@@ -115,7 +124,7 @@ int main(int argc, char** argv) {
 	cursor=loadTarga("images/cursor.tga");
 	spin=loadTarga("images/spin.tga");
 
-	spinAnim=(Animation){frames,4,0,1.0f,0.0f};
+	spinAnim=(Animation){frames,4,0,0.1f,0.0f};
 
     result = ma_engine_init(NULL, &engine);
     if (result != MA_SUCCESS) {
@@ -141,3 +150,6 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
+
+
