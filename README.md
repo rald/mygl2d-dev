@@ -1,1 +1,0 @@
-# mygl2d-dev
