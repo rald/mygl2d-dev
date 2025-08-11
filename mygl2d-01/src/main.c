@@ -159,8 +159,6 @@ int main(int argc, char** argv) {
 
 	Mouse_Free(&mouse);
 
-	glfwTerminate();
-
 	return 0;
 }
 
