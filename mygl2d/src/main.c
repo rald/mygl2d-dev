@@ -106,8 +106,8 @@ void draw() {
 
 	if(mouse->x<0) { mouse->x=0; glfwSetMousePos(mouse->x,mouse->y); }
 	if(mouse->y<0) { mouse->y=0; glfwSetMousePos(mouse->x,mouse->y); }
-	if(mouse->x>SCREEN_WIDTH-16) { mouse->x=SCREEN_WIDTH-16; glfwSetMousePos(mouse->x,mouse->y); }
-	if(mouse->y>SCREEN_HEIGHT-16) { mouse->y=SCREEN_HEIGHT-16; glfwSetMousePos(mouse->x,mouse->y); }
+	if(mouse->x>SCREEN_WIDTH-68) { mouse->x=SCREEN_WIDTH-68; glfwSetMousePos(mouse->x,mouse->y); }
+	if(mouse->y>SCREEN_HEIGHT-68) { mouse->y=SCREEN_HEIGHT-68; glfwSetMousePos(mouse->x,mouse->y); }
 
 
 //	drawTargaX(spin,64,16,spinFrames[spinAnim.currentFrame],mouse->x,mouse->y,MYGL2D_FLIP_NONE,0,0,0,1);
