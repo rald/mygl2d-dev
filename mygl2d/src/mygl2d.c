@@ -105,8 +105,6 @@ void fillPolygon(const int* points, int num_points) {
   glEnd();
 }
 
-
-
 GLuint loadTarga(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
@@ -143,46 +141,104 @@ GLuint loadTarga(const char* filename) {
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
-    
+
     // Set texture parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
+
     // Upload texture data
     glTexImage2D(GL_TEXTURE_2D, 0, (channels == 4 ? GL_RGBA : GL_RGB), width, height, 0, (channels == 4 ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, data);
-    
+
     free(data); // Free the image memory
     return textureID;
 }
 
-
-
-
-// Function to draw TGA image
-void drawTarga(GLuint textureID, int x, int y) {
+void drawTarga(GLuint texture, int texWidth, int texHeight, float posX, float posY) {
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    
-    // Enable blending for transparency
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    // Calculate the width and height of the texture
-    GLint textureWidth, textureHeight;
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &textureWidth);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &textureHeight);
-    
-    // Draw the texture as a quad at the specified pixel position
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex2f(x, y); // Bottom left
-        glTexCoord2f(1.0f, 0.0f); glVertex2f(x + textureWidth, y); // Bottom right
-        glTexCoord2f(1.0f, 1.0f); glVertex2f(x + textureWidth, y + textureHeight); // Top right
-        glTexCoord2f(0.0f, 1.0f); glVertex2f(x, y + textureHeight); // Top left
+        // Map the full texture coordinates with correct alpha transparency
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(posX, posY);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f(posX + texWidth, posY);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f(posX + texWidth, posY + texHeight);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(posX, posY + texHeight);
     glEnd();
-    
+
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+}
+
+// Helper function to rotate a point (x, y) around pivot (pivotX, pivotY) by angle rotation
+static void rotate_point(float x, float y, float pivotX, float pivotY,
+                  float cosR, float sinR, float posX, float posY,
+                  float* outX, float* outY) {
+    float dx = x - pivotX;
+    float dy = y - pivotY;
+    *outX = cosR * dx - sinR * dy + posX + pivotX;
+    *outY = sinR * dx + cosR * dy + posY + pivotY;
+}
+
+void drawTargaX(GLuint texture, int texWidth, int texHeight, Frame clip,
+                       float posX, float posY,
+                       MYGL2DFlip flipFlags, float rotation,
+                       float pivotX, float pivotY) {
+    // Enable texture and blending for transparency
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Calculate texture coordinates (flip y for OpenGL)
+    float u1 = (float)clip.x / (float)texWidth;
+    float v1 = (float)(texHeight - (clip.y + clip.h)) / (float)texHeight;
+    float u2 = (float)(clip.x + clip.w) / (float)texWidth;
+    float v2 = (float)(texHeight - clip.y) / (float)texHeight;
+
+    // Apply horizontal flip by swapping u coords
+    if (flipFlags & MYGL2D_FLIP_H) {
+        float temp = u1; u1 = u2; u2 = temp;
+    }
+
+    // Apply vertical flip by swapping v coords
+    if (flipFlags & MYGL2D_FLIP_V) {
+        float temp = v1; v1 = v2; v2 = temp;
+    }
+
+    // Precompute cos and sin of rotation angle
+    float cosR = cosf(rotation);
+    float sinR = sinf(rotation);
+
+    // Define quad corners relative to posX, posY
+    float x0 = 0.0f,     y0 = 0.0f;
+    float x1 = (float)clip.w, y1 = 0.0f;
+    float x2 = (float)clip.w, y2 = (float)clip.h;
+    float x3 = 0.0f,     y3 = (float)clip.h;
+
+    // Rotate each point around pivot
+    float rx0, ry0, rx1, ry1, rx2, ry2, rx3, ry3;
+    rotate_point(x0, y0, pivotX, pivotY, cosR, sinR, posX, posY, &rx0, &ry0);
+    rotate_point(x1, y1, pivotX, pivotY, cosR, sinR, posX, posY, &rx1, &ry1);
+    rotate_point(x2, y2, pivotX, pivotY, cosR, sinR, posX, posY, &rx2, &ry2);
+    rotate_point(x3, y3, pivotX, pivotY, cosR, sinR, posX, posY, &rx3, &ry3);
+
+    // Bind texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Draw textured quad with flipped texture coords and rotated vertices
+    glBegin(GL_QUADS);
+        glTexCoord2f(u1, v1); glVertex2f(rx0, ry0);
+        glTexCoord2f(u2, v1); glVertex2f(rx1, ry1);
+        glTexCoord2f(u2, v2); glVertex2f(rx2, ry2);
+        glTexCoord2f(u1, v2); glVertex2f(rx3, ry3);
+    glEnd();
+
+    // Disable blending and texturing
+    glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
 }
 
@@ -194,28 +250,5 @@ void updateAnimation(Animation* animation, float deltaTime) {
         if (animation->currentFrame >= animation->frameCount)
             animation->currentFrame = 0; // loop animation
     }
-}
-
-void drawTargaWithClip(GLuint texture, int texWidth, int texHeight, Frame clip, float posX, float posY) {
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    float u1 = (float)clip.x / (float)texWidth;
-    float v1 = (float)(texHeight - (clip.y + clip.h)) / (float)texHeight;  // Flip y to OpenGL texture coord
-    float u2 = (float)(clip.x + clip.w) / (float)texWidth;
-    float v2 = (float)(texHeight - clip.y) / (float)texHeight;
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glBegin(GL_QUADS);
-        glTexCoord2f(u1, v1); glVertex2f(posX, posY);
-        glTexCoord2f(u2, v1); glVertex2f(posX + clip.w, posY);
-        glTexCoord2f(u2, v2); glVertex2f(posX + clip.w, posY + clip.h);
-        glTexCoord2f(u1, v2); glVertex2f(posX, posY + clip.h);
-    glEnd();
-
-    glDisable(GL_BLEND);
-    glDisable(GL_TEXTURE_2D);
 }
 

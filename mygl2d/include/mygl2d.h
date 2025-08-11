@@ -38,6 +38,12 @@ typedef struct {
     float elapsedTime;
 } Animation;
 
+typedef enum MYGL2DFlip {
+    MYGL2D_FLIP_NONE = 0,    // No flipping
+    MYGL2D_FLIP_H = 1 << 0,  // Horizontal flip
+    MYGL2D_FLIP_V = 1 << 1   // Vertical flip
+} MYGL2DFlip;
+
 void clearScreen(void);
 void drawPoint(int x, int y);
 void drawLine(int x1, int y1, int x2, int y2);
@@ -51,10 +57,20 @@ void drawPolygon(const int* points, int num_points);
 void fillPolygon(const int* points, int num_points);
 
 GLuint loadTarga(const char* filename);
-void drawTarga(GLuint textureID, int x, int y);
+
+void drawTarga(GLuint texture, int texWidth, int texHeight, float posX, float posY);
+
+void drawTargaX(
+	GLuint texture,
+	int texWidth, int texHeight,
+	Frame clip,
+	float posX, float posY,
+	MYGL2DFlip flipFlags,
+	float rotation,
+	float pivotX, float pivotY
+);
 
 void updateAnimation(Animation* animation, float deltaTime);
-void drawTargaWithClip(GLuint texture, int texWidth, int texHeight, Frame clip, float posX, float posY);
 
 #endif /* MYGL2D_H */
 

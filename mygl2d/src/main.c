@@ -96,16 +96,9 @@ void draw() {
 	if(mouse->x>SCREEN_WIDTH-16) { mouse->x=SCREEN_WIDTH-16; glfwSetMousePos(mouse->x,mouse->y); }
 	if(mouse->y>SCREEN_HEIGHT-16) { mouse->y=SCREEN_HEIGHT-16; glfwSetMousePos(mouse->x,mouse->y); }
 
-	drawTargaWithClip(spin,64,16,frames[spinAnim.currentFrame],0,0);
+	drawTargaX(spin,64,16,frames[spinAnim.currentFrame],mouse->x,mouse->y,MYGL2D_FLIP_NONE,0,0,0);
 
-	drawTarga(cursor,mouse->x,mouse->y);
-
-
-/*
-	glColor4ub(255,255,255,255);
-	drawRect(1,1,SCREEN_WIDTH-1,SCREEN_HEIGHT-1);
-*/
-
+//	drawTarga(cursor,16,16,mouse->x,mouse->y);
 
 	glFlush();
 	glfwSwapBuffers();
@@ -115,7 +108,7 @@ int main(int argc, char** argv) {
 	glfwInit();
 
 	glfwOpenWindowHint(GLFW_WINDOW_NO_RESIZE,GL_TRUE);
-	glfwOpenWindow(SCREEN_WIDTH,SCREEN_HEIGHT,0, 0, 0, 0, 0, 0,GLFW_FULLSCREEN);
+	glfwOpenWindow(SCREEN_WIDTH,SCREEN_HEIGHT,0, 0, 0, 0, 0, 0,GLFW_WINDOW);
 	glfwSetWindowTitle(GAME_TITLE);
 	glfwDisable(GLFW_MOUSE_CURSOR);
 
@@ -150,6 +143,3 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
-
-
-
