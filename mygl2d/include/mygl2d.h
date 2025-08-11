@@ -61,13 +61,14 @@ GLuint loadTarga(const char* filename);
 void drawTarga(GLuint texture, int texWidth, int texHeight, float posX, float posY);
 
 void drawTargaX(
-	GLuint texture,
-	int texWidth, int texHeight,
+	GLuint texture, 
+	int texWidth, int texHeight, 
 	Frame clip,
 	float posX, float posY,
-	MYGL2DFlip flipFlags,
+	MYGL2DFlip flipFlags, 
 	float rotation,
-	float pivotX, float pivotY
+	float pivotX, float pivotY,
+	float scale
 );
 
 void updateAnimation(Animation* animation, float deltaTime);

@@ -185,9 +185,10 @@ static void rotate_point(float x, float y, float pivotX, float pivotY,
 }
 
 void drawTargaX(GLuint texture, int texWidth, int texHeight, Frame clip,
-                       float posX, float posY,
-                       MYGL2DFlip flipFlags, float rotation,
-                       float pivotX, float pivotY) {
+                float posX, float posY,
+                MYGL2DFlip flipFlags, float rotation,
+                float pivotX, float pivotY,
+                float scale) {
     // Enable texture and blending for transparency
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
@@ -213,13 +214,13 @@ void drawTargaX(GLuint texture, int texWidth, int texHeight, Frame clip,
     float cosR = cosf(rotation);
     float sinR = sinf(rotation);
 
-    // Define quad corners relative to posX, posY
-    float x0 = 0.0f,     y0 = 0.0f;
-    float x1 = (float)clip.w, y1 = 0.0f;
-    float x2 = (float)clip.w, y2 = (float)clip.h;
-    float x3 = 0.0f,     y3 = (float)clip.h;
+    // Define scaled quad corners relative to posX, posY
+    float x0 = 0.0f,               y0 = 0.0f;
+    float x1 = (float)clip.w * scale, y1 = 0.0f;
+    float x2 = (float)clip.w * scale, y2 = (float)clip.h * scale;
+    float x3 = 0.0f,               y3 = (float)clip.h * scale;
 
-    // Rotate each point around pivot
+    // Rotate each point around pivot and translate to position
     float rx0, ry0, rx1, ry1, rx2, ry2, rx3, ry3;
     rotate_point(x0, y0, pivotX, pivotY, cosR, sinR, posX, posY, &rx0, &ry0);
     rotate_point(x1, y1, pivotX, pivotY, cosR, sinR, posX, posY, &rx1, &ry1);
@@ -229,7 +230,7 @@ void drawTargaX(GLuint texture, int texWidth, int texHeight, Frame clip,
     // Bind texture
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    // Draw textured quad with flipped texture coords and rotated vertices
+    // Draw textured quad with texture coords and rotated vertices
     glBegin(GL_QUADS);
         glTexCoord2f(u1, v1); glVertex2f(rx0, ry0);
         glTexCoord2f(u2, v1); glVertex2f(rx1, ry1);
@@ -237,7 +238,7 @@ void drawTargaX(GLuint texture, int texWidth, int texHeight, Frame clip,
         glTexCoord2f(u1, v2); glVertex2f(rx3, ry3);
     glEnd();
 
-    // Disable blending and texturing
+    // Disable blending and texture
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
 }
