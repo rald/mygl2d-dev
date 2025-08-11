@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 	glfwSetWindowTitle(GAME_TITLE);
 	glfwDisable(GLFW_MOUSE_CURSOR);
 
-	mouse=Mouse_New();
+	mouse=Mouse_New(0,0);
 
 	cursor=loadTarga("images/cursor.tga");
 	spin=loadTarga("images/spin.tga");

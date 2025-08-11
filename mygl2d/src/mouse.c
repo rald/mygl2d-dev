@@ -1,9 +1,9 @@
 #include "mouse.h"
 
-Mouse *Mouse_New() {
+Mouse *Mouse_New(int x,int y) {
 	Mouse *mouse=malloc(sizeof(*mouse));
-	mouse->x=0;
-	mouse->y=0;
+	mouse->x=x;
+	mouse->y=y;
 	mouse->isLeftButtonDown=false;
 	mouse->isRightButtonDown=false;
 	return mouse;
